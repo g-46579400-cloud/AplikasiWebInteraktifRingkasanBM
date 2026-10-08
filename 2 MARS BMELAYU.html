@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wira Ringkasan BM - Pengembaraan Jati Diri</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;800&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #a8ff78 0%, #78ffd6 100%);
+            min-height: 100vh;
+        }
+        
+        .font-game {
+            font-family: 'Fredoka', cursive;
+        }
+        
+        .card-bounce {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-bounce:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+    </style>
+</head>
+<body class="p-3 md:p-6 text-slate-800">
+
+    <!-- TOP BAR / HEADER STICKY -->
+    <header class="max-w-4xl mx-auto bg-white/90 backdrop-blur-md rounded-2xl p-4 shadow-xl mb-6 flex flex-wrap justify-between items-center gap-4 border-4 border-yellow-300">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-amber-400 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-md">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <div>
+                <h1 class="font-game text-xl md:text-2xl text-emerald-700 tracking-wide">Wira Ringkasan BM</h1>
+                <p class="text-xs text-slate-500 font-bold">Tingkatan 2M • Bahasa Melayu</p>
+            </div>
+        </div>
+        
+        <!-- Player Stats -->
+        <div id="statsBar" class="hidden flex items-center gap-4 bg-emerald-50 px-4 py-2 rounded-xl border-2 border-emerald-200">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-user-ninja text-emerald-600"></i>
+                <span id="displayStudentName" class="font-bold text-emerald-800">Pelajar</span>
+            </div>
+            <div class="h-6 w-0.5 bg-emerald-300"></div>
+            <div class="flex items-center gap-1 text-amber-500 font-bold">
+                <i class="fa-solid fa-star text-lg animate-pulse"></i>
+                <span id="scoreText" class="text-lg">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-4xl mx-auto">
+
+        <!-- STEP 0: LOGIN & AVATAR SELECTION -->
+        <section id="stepLogin" class="bg-white rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-teal-300 text-center">
+            <div class="w-24 h-24 bg-gradient-to-tr from-amber-400 to-yellow-300 rounded-full mx-auto flex items-center justify-center text-4xl text-white shadow-lg mb-4 animate-bounce">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <h2 class="font-game text-3xl text-teal-700 mb-2">Selamat Datang Wira Bahasa!</h2>
+            <p class="text-slate-600 mb-6 font-semibold">Sila masukkan nama anda untuk memulakan misi pengembaraan ringkasan hari ini.</p>
+            
+            <div class="max-w-md mx-auto space-y-4">
+                <div>
+                    <label class="block text-left text-sm font-bold text-slate-700 mb-1">Nama Murid:</label>
+                    <input type="text" id="inputName" placeholder="Contoh: Muhammad Ali / Siti Nur" class="w-full px-5 py-3 rounded-xl border-2 border-slate-300 focus:border-teal-500 focus:ring-4 focus:ring-teal-100 outline-none text-lg font-bold text-slate-700">
+                </div>
+
+                <button onclick="startGame()" class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-game text-xl rounded-2xl shadow-lg transform active:scale-95 transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-play"></i> Mula Pengembaraan!
+                </button>
+            </div>
+        </section>
+
+        <!-- STEP 1: SET INDUKSI (Gambar & Teaser Jati Diri) -->
+        <section id="step1" class="hidden bg-white rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-blue-300">
+            <div class="flex items-center justify-between mb-4">
+                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Langkah 1: Set Induksi</span>
+                <span class="text-slate-400 text-sm font-bold"><i class="fa-solid fa-clock"></i> 5 Minit</span>
+            </div>
+
+            <h2 class="font-game text-2xl text-blue-700 mb-3"><i class="fa-solid fa-flag text-red-500"></i> Detektif Semangat Patriotisme</h2>
+            <p class="text-slate-600 mb-4 font-semibold">Perhatikan gambar situasi bawah dan pilih **3 elemen jati diri** yang paling tepat!</p>
+
+            <!-- Interactive Image / Card Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 text-center">
+                    <img src="https://images.unsplash.com/photo-1532375810709-75b1da00537c?auto=format&fit=crop&w=400&q=80" alt="Bendera Malaysia" class="h-32 w-full object-cover rounded-xl mb-2">
+                    <p class="font-bold text-slate-700 text-sm">Menghormati Jalur Gemilang</p>
+                </div>
+                <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 text-center">
+                    <img src="https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&w=400&q=80" alt="Bergotong Royong" class="h-32 w-full object-cover rounded-xl mb-2">
+                    <p class="font-bold text-slate-700 text-sm">Bergotong-royong & Berbudi</p>
+                </div>
+                <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 text-center">
+                    <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=400&q=80" alt="Perpaduan Kaum" class="h-32 w-full object-cover rounded-xl mb-2">
+                    <p class="font-bold text-slate-700 text-sm">Perpaduan Kaum & Harmony</p>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 p-4 rounded-2xl mb-6">
+                <p class="font-bold text-blue-900 mb-2">Soalan: Apakah nilai utama yang ditunjukkan dalam gambar di atas?</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="induksiOptions">
+                    <button onclick="checkInduksi(this, true)" class="p-3 bg-white border-2 border-blue-200 hover:border-blue-500 rounded-xl font-bold text-left text-slate-700 flex items-center justify-between">
+                        1. Cinta akan negara & jati diri <i class="fa-solid fa-circle-check text-slate-300"></i>
+                    </button>
+                    <button onclick="checkInduksi(this, false)" class="p-3 bg-white border-2 border-blue-200 hover:border-blue-500 rounded-xl font-bold text-left text-slate-700 flex items-center justify-between">
+                        2. Membuang sampah di merata tempat <i class="fa-solid fa-circle-xmark text-slate-300"></i>
+                    </button>
+                    <button onclick="checkInduksi(this, true)" class="p-3 bg-white border-2 border-blue-200 hover:border-blue-500 rounded-xl font-bold text-left text-slate-700 flex items-center justify-between">
+                        3. Menjaga keharmonian bersama <i class="fa-solid fa-circle-check text-slate-300"></i>
+                    </button>
+                    <button onclick="checkInduksi(this, true)" class="p-3 bg-white border-2 border-blue-200 hover:border-blue-500 rounded-xl font-bold text-left text-slate-700 flex items-center justify-between">
+                        4. Semangat bermasyarakat & prihatin <i class="fa-solid fa-circle-check text-slate-300"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button id="btnStep1Next" disabled onclick="goToStep(2)" class="w-full py-3 bg-slate-300 text-white font-game text-lg rounded-xl shadow transition-all cursor-not-allowed">
+                Seterusnya: Misi Asingkan Isi <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </section>
+
+        <!-- STEP 2: ASINGKAN ISI PENTING VS ISI SAMPINGAN -->
+        <section id="step2" class="hidden bg-white rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-purple-300">
+            <div class="flex items-center justify-between mb-4">
+                <span class="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Langkah 2: Perkembangan</span>
+                <span class="text-slate-400 text-sm font-bold"><i class="fa-solid fa-bullseye"></i> Cari 3 Isi Penting</span>
+            </div>
+
+            <h2 class="font-game text-2xl text-purple-700 mb-2"><i class="fa-solid fa-magnifying-glass"></i> Pemburu Isi Penting</h2>
+            <p class="text-slate-600 mb-4 font-semibold">Baca petikan di bawah. Klik pada **3 Ayat Isi Penting** sahaja! (Jangan pilih huraian/contoh sampingan).</p>
+
+            <!-- Petikan Prosa -->
+            <div class="bg-amber-50 border-2 border-amber-200 p-4 rounded-2xl text-slate-800 text-sm leading-relaxed mb-6 space-y-2">
+                <h3 class="font-bold text-amber-900 border-b border-amber-200 pb-1"><i class="fa-solid fa-book-open"></i> Petikan: Berbudi Kepada Alam dan Negara</h3>
+                <p>Semangat patriotisme dan jati diri amat penting bagi setiap warganegara Malaysia. <span class="bg-yellow-200 px-1 rounded">(1) Antara langkah memupuk jati diri ialah menghormati budaya dan bahasa kebangsaan.</span> Hal ini demikian kerana bahasa menunjukkan identiti bangsa kita. <span class="bg-yellow-200 px-1 rounded">(2) Selain itu, rakyat perlu dipupuk supaya sentiasa memelihara kelestarian alam sekitar.</span> Sebagai contoh, program menanam pokok dan gotong-royong perlu sering diadakan di peringkat sekolah. <span class="bg-yellow-200 px-1 rounded">(3) Di samping itu, penglibatan aktif dalam aktiviti kemasyarakatan dapat mengukuhkan perpaduan kaum.</span> Kesimpulannya, semua pihak hendaklah bersatu padu demi kemakmuran negara.</p>
+            </div>
+
+            <!-- Clickable Cards -->
+            <div class="space-y-3 mb-6" id="isiList">
+                <div onclick="selectIsi(this, true)" class="p-3 bg-slate-50 border-2 border-slate-200 hover:border-purple-400 rounded-xl cursor-pointer transition flex items-center justify-between font-semibold text-slate-700">
+                    <span>A. Menghormati budaya dan bahasa kebangsaan.</span>
+                    <i class="fa-solid fa-circle-notch text-slate-300 status-icon"></i>
+                </div>
+                <div onclick="selectIsi(this, false)" class="p-3 bg-slate-50 border-2 border-slate-200 hover:border-purple-400 rounded-xl cursor-pointer transition flex items-center justify-between font-semibold text-slate-700">
+                    <span>B. Hal ini demikian kerana bahasa menunjukkan identiti bangsa kita. (Huraian)</span>
+                    <i class="fa-solid fa-circle-notch text-slate-300 status-icon"></i>
+                </div>
+                <div onclick="selectIsi(this, true)" class="p-3 bg-slate-50 border-2 border-slate-200 hover:border-purple-400 rounded-xl cursor-pointer transition flex items-center justify-between font-semibold text-slate-700">
+                    <span>C. Memelihara dan menjaga kelestarian alam sekitar.</span>
+                    <i class="fa-solid fa-circle-notch text-slate-300 status-icon"></i>
+                </div>
+                <div onclick="selectIsi(this, false)" class="p-3 bg-slate-50 border-2 border-slate-200 hover:border-purple-400 rounded-xl cursor-pointer transition flex items-center justify-between font-semibold text-slate-700">
+                    <span>D. Contohnya program gotong-royong menanam pokok di sekolah. (Contoh)</span>
+                    <i class="fa-solid fa-circle-notch text-slate-300 status-icon"></i>
+                </div>
+                <div onclick="selectIsi(this, true)" class="p-3 bg-slate-50 border-2 border-slate-200 hover:border-purple-400 rounded-xl cursor-pointer transition flex items-center justify-between font-semibold text-slate-700">
+                    <span>E. Penglibatan aktif dalam aktiviti kemasyarakatan mengukuhkan perpaduan.</span>
+                    <i class="fa-solid fa-circle-notch text-slate-300 status-icon"></i>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center bg-purple-50 p-3 rounded-xl mb-4">
+                <span class="text-xs font-bold text-purple-900">Isi Penting Ditemui: <span id="isiCount" class="text-base text-purple-700 font-extrabold">0</span> / 3</span>
+            </div>
+
+            <button id="btnStep2Next" disabled onclick="goToStep(3)" class="w-full py-3 bg-slate-300 text-white font-game text-lg rounded-xl shadow transition-all cursor-not-allowed">
+                Seterusnya: Susun Kad Ayat <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </section>
+
+        <!-- STEP 3: SUSUN KAD AYAT & PENANDA WACANA (SCAFFOLDING TP1-TP3) -->
+        <section id="step3" class="hidden bg-white rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-emerald-300">
+            <div class="flex items-center justify-between mb-4">
+                <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Langkah 3: Bantuan TP1-TP3</span>
+                <span class="text-slate-400 text-sm font-bold"><i class="fa-solid fa-wand-magic-sparkles"></i> Penanda Wacana</span>
+            </div>
+
+            <h2 class="font-game text-2xl text-emerald-700 mb-2"><i class="fa-solid fa-puzzle-piece"></i> Susun Kad Penanda Wacana</h2>
+            <p class="text-slate-600 mb-4 font-semibold">Pilih penanda wacana yang gramatis untuk menyambung isi-isi penting tadi:</p>
+
+            <div class="space-y-4 mb-6">
+                <!-- Sentence 1 -->
+                <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
+                    <span class="text-xs font-bold text-emerald-700 uppercase">Isi Pertama:</span>
+                    <div class="flex flex-wrap items-center gap-2 mt-2">
+                        <select id="pw1" class="px-3 py-2 bg-white border-2 border-emerald-300 rounded-xl font-bold text-emerald-800 outline-none">
+                            <option value="">-- Pilih Penanda Wacana --</option>
+                            <option value="Antara langkah utama ialah">Antara langkah utama ialah</option>
+                            <option value="Walau bagaimanapun">Walau bagaimanapun</option>
+                        </select>
+                        <span class="font-semibold text-slate-700">menghormati budaya dan bahasa kebangsaan.</span>
+                    </div>
+                </div>
+
+                <!-- Sentence 2 -->
+                <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
+                    <span class="text-xs font-bold text-emerald-700 uppercase">Isi Kedua:</span>
+                    <div class="flex flex-wrap items-center gap-2 mt-2">
+                        <select id="pw2" class="px-3 py-2 bg-white border-2 border-emerald-300 rounded-xl font-bold text-emerald-800 outline-none">
+                            <option value="">-- Pilih Penanda Wacana --</option>
+                            <option value="Selain itu, kita perlu">Selain itu, kita perlu</option>
+                            <option value="Oleh yang demikian">Oleh yang demikian</option>
+                        </select>
+                        <span class="font-semibold text-slate-700">memelihara dan menjaga kelestarian alam sekitar.</span>
+                    </div>
+                </div>
+
+                <!-- Sentence 3 -->
+                <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
+                    <span class="text-xs font-bold text-emerald-700 uppercase">Isi Ketiga:</span>
+                    <div class="flex flex-wrap items-center gap-2 mt-2">
+                        <select id="pw3" class="px-3 py-2 bg-white border-2 border-emerald-300 rounded-xl font-bold text-emerald-800 outline-none">
+                            <option value="">-- Pilih Penanda Wacana --</option>
+                            <option value="Seterusnya, penglibatan aktif">Seterusnya, penglibatan aktif</option>
+                            <option value="Meskipun begitu">Meskipun begitu</option>
+                        </select>
+                        <span class="font-semibold text-slate-700">dalam aktiviti kemasyarakatan dapat mengukuhkan perpaduan.</span>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="verifyStep3()" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-game text-lg rounded-xl shadow transition-all mb-3">
+                <i class="fa-solid fa-check"></i> Semak Susunan Ayat
+            </button>
+
+            <button id="btnStep3Next" disabled onclick="goToStep(4)" class="w-full py-3 bg-slate-300 text-white font-game text-lg rounded-xl shadow transition-all cursor-not-allowed">
+                Seterusnya: Studio Penulisan Ringkasan <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </section>
+
+        <!-- STEP 4: STUDIO PENULISAN RINGKASAN (<100 PATAH PERKATAAN) -->
+        <section id="step4" class="hidden bg-white rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-amber-300">
+            <div class="flex items-center justify-between mb-4">
+                <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full uppercase">Langkah 4: Penulisan Murni</span>
+                <span class="text-slate-400 text-sm font-bold"><i class="fa-solid fa-pen-nib"></i> Had: < 100 Perkataan</span>
+            </div>
+
+            <h2 class="font-game text-2xl text-amber-700 mb-2"><i class="fa-solid fa-pen-to-square"></i> Studio Tulis Ringkasan</h2>
+            <p class="text-slate-600 mb-4 font-semibold">Tulis atau kemaskan ringkasan lengkap anda di bawah. Pastikan ayat gramatis dan **TIDAK MELEBIHI 100 PATAH PERKATAAN**.</p>
+
+            <!-- Auto-fill Scaffolding Button for weak students -->
+            <div class="mb-3 flex justify-between items-center">
+                <button onclick="autoFillSummary()" class="px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold text-xs rounded-xl transition flex items-center gap-2">
+                    <i class="fa-solid fa-robot"></i> Bantuan TP1-TP3: Muat Turun Draf Ayat
+                </button>
+
+                <!-- Word Counter Badge -->
+                <div class="bg-slate-100 px-3 py-1 rounded-xl font-bold text-sm text-slate-700">
+                    Jumlah Perkataan: <span id="wordCountDisplay" class="text-emerald-600 font-extrabold text-base">0</span> / 100
+                </div>
+            </div>
+
+            <textarea id="summaryTextarea" oninput="updateWordCount()" rows="6" placeholder="Tulis ringkasan anda di sini..." class="w-full p-4 rounded-2xl border-2 border-slate-300 focus:border-amber-400 focus:ring-4 focus:ring-amber-100 outline-none text-slate-700 font-medium text-base mb-4"></textarea>
+
+            <div id="wordCountAlert" class="hidden p-3 bg-red-100 border border-red-300 text-red-700 font-bold text-xs rounded-xl mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation text-base"></i> Amaran! Ringkasan anda telah melebihi 100 patah perkataan. Sila pendekkan.
+            </div>
+
+            <button id="btnSubmitSummary" onclick="submitSummary()" class="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-game text-xl rounded-2xl shadow-lg transition-all">
+                <i class="fa-solid fa-paper-plane"></i> Hantar Ringkasan & Ke Penutup
+            </button>
+        </section>
+
+        <!-- STEP 5: PENUTUP & KUIZ REFLEKSI + CERTIFICATE -->
+        <section id="step5" class="hidden bg-white rounded-3xl p-6 md:p-8 shadow-2xl border-4 border-teal-400 text-center">
+            <div class="w-20 h-20 bg-teal-100 rounded-full mx-auto flex items-center justify-center text-4xl text-teal-600 mb-4">
+                <i class="fa-solid fa-award"></i>
+            </div>
+            
+            <h2 class="font-game text-3xl text-teal-800 mb-2">Syabas & Tahniah!</h2>
+            <p class="text-slate-600 font-semibold mb-6">Anda telah berjaya menyelesaikan Misi Ringkasan BM Hari Ini!</p>
+
+            <!-- Certificate Card -->
+            <div class="bg-gradient-to-br from-amber-50 to-orange-50 border-4 border-amber-300 p-6 rounded-3xl shadow-inner max-w-lg mx-auto mb-6 text-left relative overflow-hidden">
+                <div class="absolute -right-6 -bottom-6 text-amber-200/40 text-9xl font-bold select-none">
+                    <i class="fa-solid fa-certificate"></i>
+                </div>
+                <div class="text-center border-b-2 border-amber-200 pb-3 mb-4">
+                    <h3 class="font-game text-xl text-amber-800">SIJIL KEJAYAAN RINGKASAN</h3>
+                    <p class="text-xs text-amber-600 uppercase font-bold">SMK Seri Patriot • Tingkatan 2M</p>
+                </div>
+                <p class="text-xs text-slate-500 mb-1">Dianugerahkan Kepada:</p>
+                <h4 id="certStudentName" class="font-game text-2xl text-emerald-700 mb-3">Nama Pelajar</h4>
+                
+                <div class="space-y-2 text-sm text-slate-700 mb-4">
+                    <p class="flex items-center justify-between">
+                        <span><i class="fa-solid fa-check text-emerald-500"></i> Penguasaan Isi Penting:</span>
+                        <span class="font-bold text-slate-900">3 / 3 Isi (Cemerlang)</span>
+                    </p>
+                    <p class="flex items-center justify-between">
+                        <span><i class="fa-solid fa-check text-emerald-500"></i> Penggunaan Penanda Wacana:</span>
+                        <span class="font-bold text-slate-900">Gramatis</span>
+                    </p>
+                    <p class="flex items-center justify-between">
+                        <span><i class="fa-solid fa-check text-emerald-500"></i> Jumlah Perkataan:</span>
+                        <span id="certWordCount" class="font-bold text-slate-900">< 100 Perkataan</span>
+                    </p>
+                </div>
+
+                <div class="flex justify-between items-center bg-white/80 p-3 rounded-2xl border border-amber-200">
+                    <span class="font-bold text-xs text-amber-900">JUMLAH BINTANG:</span>
+                    <div id="certStars" class="text-amber-400 text-xl flex gap-1">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Refleksi -->
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 max-w-lg mx-auto mb-6 text-left">
+                <h4 class="font-bold text-slate-800 mb-2 text-sm"><i class="fa-solid fa-comments"></i> Refleksi Kendiri Ringkas:</h4>
+                <p class="text-xs text-slate-600 mb-3">Apakah ciri utama ringkasan yang baik?</p>
+                <div class="space-y-2">
+                    <button onclick="quizAnswer(this, true)" class="w-full p-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 text-left hover:bg-emerald-50">
+                        A. Mengandungi isi penting sahaja, gramatis dan tidak melebihi 100 perkataan.
+                    </button>
+                    <button onclick="quizAnswer(this, false)" class="w-full p-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 text-left hover:bg-red-50">
+                        B. Memasukkan contoh, huraian panjang dan menyalin semula seluruh prosa.
+                    </button>
+                </div>
+            </div>
+
+            <button onclick="location.reload()" class="px-6 py-3 bg-slate-800 hover:bg-slate-900 text-white font-game rounded-xl shadow-md transition">
+                <i class="fa-solid fa-rotate-right"></i> Main Semula
+            </button>
+        </section>
+
+    </main>
+
+    <!-- AUDIO SYNTHESIZER (WEB AUDIO API) FOR GAMIFICATION SOUNDS -->
+    <script>
+        // Web Audio API Sound System
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(150, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'win') {
+                // Fanfare sound
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.connect(g);
+                    g.connect(audioCtx.destination);
+                    o.frequency.value = freq;
+                    g.gain.setValueAtTime(0.15, audioCtx.currentTime + idx * 0.12);
+                    g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.12 + 0.3);
+                    o.start(audioCtx.currentTime + idx * 0.12);
+                    o.stop(audioCtx.currentTime + idx * 0.12 + 0.3);
+                });
+            }
+        }
+
+        // Game State Variables
+        let studentName = "";
+        let score = 0;
+        let selectedIsiCount = 0;
+        let currentStep = 0;
+
+        function updateScore(points) {
+            score += points;
+            document.getElementById('scoreText').innerText = score;
+        }
+
+        function startGame() {
+            const nameInput = document.getElementById('inputName').value.trim();
+            if (!nameInput) {
+                alert("Sila masukkan nama anda dahulu!");
+                return;
+            }
+            studentName = nameInput;
+            document.getElementById('displayStudentName').innerText = studentName;
+            document.getElementById('certStudentName').innerText = studentName;
+            document.getElementById('statsBar').classList.remove('hidden');
+            
+            playSound('correct');
+            goToStep(1);
+        }
+
+        function goToStep(stepNum) {
+            currentStep = stepNum;
+            for (let i = 0; i <= 5; i++) {
+                const el = document.getElementById(`step${i}`);
+                if (el) el.classList.add('hidden');
+            }
+            const activeStep = document.getElementById(`step${stepNum}`);
+            if (activeStep) {
+                activeStep.classList.remove('hidden');
+                activeStep.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Step 1: Induksi
+        let induksiScore = 0;
+        function checkInduksi(btn, isCorrect) {
+            if (isCorrect) {
+                btn.classList.remove('bg-white', 'border-blue-200');
+                btn.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
+                playSound('correct');
+                induksiScore++;
+                updateScore(10);
+            } else {
+                btn.classList.remove('bg-white', 'border-blue-200');
+                btn.classList.add('bg-red-100', 'border-red-400', 'text-red-900', 'shake');
+                playSound('wrong');
+            }
+            btn.disabled = true;
+
+            if (induksiScore >= 2) {
+                const btnNext = document.getElementById('btnStep1Next');
+                btnNext.disabled = false;
+                btnNext.classList.remove('bg-slate-300', 'cursor-not-allowed');
+                btnNext.classList.add('bg-blue-600', 'hover:bg-blue-700', 'active:scale-95');
+            }
+        }
+
+        // Step 2: Select Isi
+        function selectIsi(element, isMainIdea) {
+            const icon = element.querySelector('.status-icon');
+            if (element.dataset.selected === "true") return;
+
+            if (isMainIdea) {
+                element.classList.remove('bg-slate-50', 'border-slate-200');
+                element.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
+                icon.className = "fa-solid fa-circle-check text-emerald-600 text-xl";
+                element.dataset.selected = "true";
+                selectedIsiCount++;
+                document.getElementById('isiCount').innerText = selectedIsiCount;
+                playSound('correct');
+                updateScore(20);
+
+                if (selectedIsiCount >= 3) {
+                    const btnNext = document.getElementById('btnStep2Next');
+                    btnNext.disabled = false;
+                    btnNext.classList.remove('bg-slate-300', 'cursor-not-allowed');
+                    btnNext.classList.add('bg-purple-600', 'hover:bg-purple-700', 'active:scale-95');
+                }
+            } else {
+                element.classList.remove('bg-slate-50', 'border-slate-200');
+                element.classList.add('bg-red-100', 'border-red-400', 'text-red-900', 'shake');
+                icon.className = "fa-solid fa-circle-xmark text-red-500 text-xl";
+                playSound('wrong');
+            }
+        }
+
+        // Step 3: Verify Sentence Order
+        function verifyStep3() {
+            const pw1 = document.getElementById('pw1').value;
+            const pw2 = document.getElementById('pw2').value;
+            const pw3 = document.getElementById('pw3').value;
+
+            if (pw1 === "Antara langkah utama ialah" && pw2 === "Selain itu, kita perlu" && pw3 === "Seterusnya, penglibatan aktif") {
+                playSound('correct');
+                alert("Tahniah! Semua penanda wacana disusun dengan amat gramatis!");
+                updateScore(30);
+
+                const btnNext = document.getElementById('btnStep3Next');
+                btnNext.disabled = false;
+                btnNext.classList.remove('bg-slate-300', 'cursor-not-allowed');
+                btnNext.classList.add('bg-emerald-600', 'hover:bg-emerald-700', 'active:scale-95');
+            } else {
+                playSound('wrong');
+                alert("Ada penanda wacana yang kurang sesuai. Sila semak semula!");
+            }
+        }
+
+        // Step 4: Auto Fill Scaffolding for TP1-TP3
+        function autoFillSummary() {
+            const pw1 = document.getElementById('pw1').value || "Antara langkah utama ialah";
+            const pw2 = document.getElementById('pw2').value || "Selain itu, kita perlu";
+            const pw3 = document.getElementById('pw3').value || "Seterusnya, penglibatan aktif";
+
+            const draft = `${pw1} menghormati budaya dan bahasa kebangsaan. ${pw2} memelihara dan menjaga kelestarian alam sekitar. ${pw3} dalam aktiviti kemasyarakatan dapat mengukuhkan perpaduan kaum.`;
+            document.getElementById('summaryTextarea').value = draft;
+            updateWordCount();
+            playSound('correct');
+        }
+
+        // Live Word Counter
+        function updateWordCount() {
+            const text = document.getElementById('summaryTextarea').value.trim();
+            const words = text ? text.split(/\s+/).length : 0;
+            
+            const display = document.getElementById('wordCountDisplay');
+            const alertBox = document.getElementById('wordCountAlert');
+            
+            display.innerText = words;
+
+            if (words > 100) {
+                display.classList.remove('text-emerald-600');
+                display.classList.add('text-red-600');
+                alertBox.classList.remove('hidden');
+            } else {
+                display.classList.remove('text-red-600');
+                display.classList.add('text-emerald-600');
+                alertBox.classList.add('hidden');
+            }
+        }
+
+        function submitSummary() {
+            const text = document.getElementById('summaryTextarea').value.trim();
+            const words = text ? text.split(/\s+/).length : 0;
+
+            if (words === 0) {
+                alert("Sila tulis ringkasan anda terlebih dahulu!");
+                return;
+            }
+            if (words > 100) {
+                alert("Ringkasan anda melebihi 100 patah perkataan! Sila ringkaskan lagi.");
+                return;
+            }
+
+            document.getElementById('certWordCount').innerText = `${words} Perkataan`;
+            playSound('win');
+            
+            // Trigger Confetti Celebration!
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 120,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+            }
+
+            goToStep(5);
+        }
+
+        function quizAnswer(btn, isCorrect) {
+            if (isCorrect) {
+                btn.classList.add('bg-emerald-200', 'border-emerald-500');
+                playSound('correct');
+                alert("Jawapan tepat! Ringkasan mesti padat, gramatis dan fokus pada isi penting.");
+            } else {
+                btn.classList.add('bg-red-200', 'border-red-400');
+                playSound('wrong');
+            }
+        }
+    </script>
+</body>
+</html>
